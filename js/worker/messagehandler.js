@@ -6,6 +6,7 @@
 
 var run = true;
 var workingpath = '';
+var startCode = '';
 
 function Send(command, data) {
     postMessage(
@@ -64,6 +65,7 @@ onmessage = function(e) {
 
 Register("Abort", function(){ run = false; });
 Register("WorkingPath", function(data){ workingpath = data; });
+Register("StartCode", function(data) {startCode =  data;})
 
 module.exports.Register = Register;
 module.exports.Debug = Debug;
@@ -72,3 +74,4 @@ module.exports.Warning = Warning;
 module.exports.Abort = Abort;
 module.exports.Send = Send;
 module.exports.GetWorkingPath = function() { return workingpath; };
+module.exports.GetStartCode = function() { return startCode; };

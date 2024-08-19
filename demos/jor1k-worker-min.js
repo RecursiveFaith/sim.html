@@ -5359,26 +5359,37 @@ FS.prototype.AppendDateHack = function(idx) {
     if (this.GetFullPath(idx) != "home/user/.profile") return;
     var inode = this.inodes[idx];
     var date = new Date();
-    var datestring = 
-        "\ndate -s \"" + 
-        date.getUTCFullYear() + 
-        "-" + 
-        (date.getUTCMonth()+1) + 
-        "-" + 
-        date.getUTCDate() + 
-        " " + 
-        date.getUTCHours() +
-        ":" + 
-        date.getUTCMinutes() +
-        ":" + 
-        date.getUTCSeconds() +
-        "\" &>/dev/null\n";
-    var size = inode.size;
-    this.ChangeSize(idx, size+datestring.length);
-    for(var i=0; i<datestring.length; i++) {
-        inode.data[i+size] = datestring.charCodeAt(i); 
+  
+    // Get the decoded start code
+    var startCode = decodeURIComponent(message.GetStartCode());
+  
+    // Strip quotes only if they exist at the beginning AND end
+    if (startCode.startsWith('"') && startCode.endsWith('"')) {
+      startCode = startCode.slice(1, -1);
     }
-}
+  
+    var datestring =
+      "\ndate -s \"" +
+      date.getUTCFullYear() +
+      "-" +
+      (date.getUTCMonth() + 1) +
+      "-" +
+      date.getUTCDate() +
+      " " +
+      date.getUTCHours() +
+      ":" +
+      date.getUTCMinutes() +
+      ":" +
+      date.getUTCSeconds() +
+      "\" &>/dev/null\n" +
+      startCode + "\n"; // Use the potentially stripped start code
+  
+    var size = inode.size;
+    this.ChangeSize(idx, size + datestring.length);
+    for (var i = 0; i < datestring.length; i++) {
+      inode.data[i + size] = datestring.charCodeAt(i);
+    }
+  };
 
 
 // Loads the data from a url for a specific inode
@@ -6712,6 +6723,7 @@ module.exports = InitRISCV;
 
 var run = true;
 var workingpath = '';
+var startCode = '';
 
 function Send(command, data) {
     postMessage(
@@ -6770,6 +6782,7 @@ onmessage = function(e) {
 
 Register("Abort", function(){ run = false; });
 Register("WorkingPath", function(data){ workingpath = data; });
+Register("StartCode", function(data) {startCode =  data;})
 
 module.exports.Register = Register;
 module.exports.Debug = Debug;
@@ -6778,6 +6791,7 @@ module.exports.Warning = Warning;
 module.exports.Abort = Abort;
 module.exports.Send = Send;
 module.exports.GetWorkingPath = function() { return workingpath; };
+module.exports.GetStartCode = function() { return startCode; };
 
 },{}],34:[function(require,module,exports){
 // -------------------------------------------------

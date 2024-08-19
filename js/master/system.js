@@ -52,11 +52,14 @@ function jor1kGUI(parameters)
 
     // ----------------------
 
+    const urlParams = new URLSearchParams(window.location.search);
+    const startCode = urlParams.get('run') || ''; // Get 'run' parameter, default to empty string
     this.worker = (this.params.worker instanceof Worker) ?
         this.params.worker : new Worker("jor1k-worker-min.js");
 
     message.SetWorker(this.worker);
     message.Send("WorkingPath", this.params.path);
+    message.Send("StartCode", startCode);
 
     // ----
 
