@@ -5,12 +5,12 @@
 
 html, body {
   color: #333;
+  background: #008080;
 }
 
-.windows {
-    overflow:auto;
-    border-color: #2C458D;
-    border-style: solid;    
+.window {
+    width: 660px;
+    position: fixed;
 }
 
 .infobox {
