@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="css/98.css">
   <link rel="stylesheet" href="css/default.css">
 </head>
-<body onload="Start()">
+<body>
   <canvas id="fbfullscreen" width="640" height="400" style="width: 0px; height: 0px;position:fixed;z-index:-10;">
     Framebuffer uses canvas
   </canvas>
@@ -16,6 +16,8 @@
   <div class="window" style="z-index: 100">
     <div class="title-bar">
       <div class="title-bar-text">Linux shell</div>
+      <div class="title-bar-controls">
+      </div>
     </div>
     <div class="window-body">
       <div class="flex-container">
@@ -51,6 +53,8 @@
   <div class="window">
     <div class="title-bar">
       <div class="title-bar-text">Linux Display (type startx into shell)</div>
+      <div class="title-bar-controls">
+      </div>
     </div>
     <div class="window-body">
       <div class="framebuffer-container">
@@ -62,9 +66,12 @@
   </div>
   
   
-  <div class="window">
+  <div class="window minimized">
     <div class="title-bar">
       <div class="title-bar-text">Links</div>
+      <div class="title-bar-controls">
+        <button class="close-button">x</button> 
+      </div>
     </div>
     <div class="window-body">
       <div class="infobox">
@@ -83,9 +90,12 @@
     </div>
   </div>
   
-  <div class="window">
+  <div class="window minimized">
     <div class="title-bar">
       <div class="title-bar-text">Developer and contributors</div>
+      <div class="title-bar-controls">
+        <button class="close-button">x</button> 
+      </div>
     </div>
     <div class="window-body">
       <div class="infobox">
@@ -249,97 +259,169 @@
       jor1k = new Jor1k(jor1kparameters);
       
     }
-
+    
     /**
-     * Custom code
-     **/
-// Get all elements with the class "window" and "title-bar"
-const windows = document.querySelectorAll('.window');
-const titleBars = document.querySelectorAll('.title-bar');
-
-// Dynamically get the window width (adjust if needed)
-const windowWidth = 660; // Or you can calculate it dynamically if necessary
-
-// Function to randomize window positions
-function randomizeWindowPositions() {
+    * Custom code
+    **/
+    // Get all elements with the class "window" and "title-bar"
+    let windows = document.querySelectorAll('.window');
+    const titleBars = document.querySelectorAll('.title-bar');
+    
+    // Dynamically get the window width (adjust if needed)
+    const windowWidth = 660; // Or you can calculate it dynamically if necessary
+    
+    // Function to bring a window to the front
+    function bringWindowToFront(window) {
+      const maxZIndex = Math.max(...Array.from(document.querySelectorAll('.window')).map(w => parseFloat(w.style.zIndex) || 0));
+      window.style.zIndex = maxZIndex + 1;
+    }
+    
+    // Add click event listeners to each window
+    windows.forEach(window => {
+      window.addEventListener('click', () => {
+        bringWindowToFront(window);
+      });
+    });    
+    
+    // Function to randomize window positions
+    function randomizeWindowPositions() {
   windows.forEach(window => {
     // Get the browser window's dimensions
     const viewportWidth = window.clientWidth;
     const viewportHeight = window.clientHeight;
 
     // Calculate random positions within the viewport, accounting for window size
-    const maxX = Math.min(viewportWidth, windowWidth) * .5
-    const maxY = viewportHeight * .5
+    const maxX = Math.min(viewportWidth, windowWidth) * 0.5;
+    const maxY = viewportHeight * 0.5;
     const randomX = Math.floor(Math.random() * maxX);
     const randomY = Math.floor(Math.random() * maxY);
 
     // Set the window's position
-    window.style.left = randomX + 'px';
-    window.style.top = randomY + 'px';
+    window.style.left = randomX + "px";
+    window.style.top = randomY + "px";
   });
 }
-
-window.onload = () => {
-  randomizeWindowPositions()  
-  Start()
-}
-
-// Variables to track drag state
-let activeWindow = null;
-let offsetX, offsetY;
-let isDragging = false;
-
-// Function to handle the start of dragging
-function startDrag(e) {
-  // Prevent default behavior to avoid text selection etc.
-  e.preventDefault();
-
-  // Get the clicked window and its position
-  activeWindow = e.target.closest('.window'); 
-  const rect = activeWindow.getBoundingClientRect();
-  
-  // Calculate the offset between the mouse/touch position and the window's top-left corner
-  offsetX = (e.clientX || e.touches[0].clientX) - rect.left;
-  offsetY = (e.clientY || e.touches[0].clientY) - rect.top;
-
-  // Set the dragging flag
-  isDragging = true;
-
-  // Bring the active window to the front
-  const maxZIndex = Math.max(...Array.from(windows).map(w => parseFloat(w.style.zIndex) || 0));
-  activeWindow.style.zIndex = maxZIndex + 1;
-}
-
-// Function to handle dragging
-function drag(e) {
-  if (!isDragging || !activeWindow) return;
-
-  // Calculate the new position of the window
-  const newX = (e.clientX || e.touches[0].clientX) - offsetX;
-  const newY = (e.clientY || e.touches[0].clientY) - offsetY;
-
-  // Set the window's position
-  activeWindow.style.left = newX + 'px';
-  activeWindow.style.top = newY + 'px';
-}
-
-// Function to handle the end of dragging
-function endDrag() {
-  isDragging = false;
-  activeWindow = null;
-}
-
-// Add event listeners for mouse and touch events
-titleBars.forEach(titleBar => {
-  titleBar.addEventListener('mousedown', startDrag);
-  titleBar.addEventListener('touchstart', startDrag);
-});
-
-document.addEventListener('mousemove', drag);
-document.addEventListener('touchmove', drag);
-
-document.addEventListener('mouseup', endDrag);
-document.addEventListener('touchend', endDrag);
+    
+    window.onload = () => {
+      Start();
+      const minimizedWindows = document.querySelectorAll('.window.minimized');
+      minimizedWindows.forEach(window => {
+        minimizeWindow(window); // Call minimizeWindow to create the startbar button
+      });
+      randomizeWindowPositions()
+    };
+    
+    // Variables to track drag state
+    let activeWindow = null;
+    let offsetX, offsetY;
+    let isDragging = false;
+    
+    // Function to handle the start of dragging
+    function startDrag(e) {
+      // Prevent default behavior to avoid text selection etc.
+      e.preventDefault();
+      
+      // Get the clicked window and its position
+      activeWindow = e.target.closest('.window'); 
+      const rect = activeWindow.getBoundingClientRect();
+      
+      // Calculate the offset between the mouse/touch position and the window's top-left corner
+      offsetX = (e.clientX || e.touches[0].clientX) - rect.left;
+      offsetY = (e.clientY || e.touches[0].clientY) - rect.top;
+      
+      // Set the dragging flag
+      isDragging = true;
+      
+      // Bring the active window to the front
+      const maxZIndex = Math.max(...Array.from(windows).map(w => parseFloat(w.style.zIndex) || 0));
+      activeWindow.style.zIndex = maxZIndex + 1;
+    }
+    
+    // Function to handle dragging
+    function drag(e) {
+      if (!isDragging || !activeWindow) return;
+      
+      // Calculate the new position of the window
+      const newX = (e.clientX || e.touches[0].clientX) - offsetX;
+      const newY = (e.clientY || e.touches[0].clientY) - offsetY;
+      
+      // Set the window's position
+      activeWindow.style.left = newX + 'px';
+      activeWindow.style.top = newY + 'px';
+    }
+    
+    // Function to handle the end of dragging
+    function endDrag() {
+      isDragging = false;
+      activeWindow = null;
+    }
+    
+    // Add event listeners for mouse and touch events
+    titleBars.forEach(titleBar => {
+      titleBar.addEventListener('mousedown', startDrag);
+      titleBar.addEventListener('touchstart', startDrag);
+    });
+    
+    document.addEventListener('mousemove', drag);
+    document.addEventListener('touchmove', drag);
+    
+    document.addEventListener('mouseup', endDrag);
+    document.addEventListener('touchend', endDrag);
+    
+    // Add event listener to close buttons
+    const closeButtons = document.querySelectorAll('.close-button');
+    closeButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        // Find the parent window
+        const windowToClose = button.closest('.window');
+        
+        // Remove the window from the DOM
+        windowToClose.remove();
+      });
+    });
+    
+    
+    // Function to minimize a window
+    function minimizeWindow(window) {
+      window.style.display = 'none';
+      window.classList.add('minimized');
+      
+      // Create a startbar button for the minimized window
+      const startButton = document.createElement('div');
+      startButton.classList.add('startbar-button');
+      startButton.textContent = window.querySelector('.title-bar-text').textContent;
+      
+      // Add click event to restore the window
+      startButton.addEventListener('click', () => {
+        restoreWindow(window, startButton);
+      });
+      
+      // Add the button to the startbar
+      document.getElementById('startbar').appendChild(startButton);
+    }
+    
+    // Function to restore a minimized window
+    function restoreWindow(window, startButton) {
+      window.style.display = 'block';
+      window.classList.remove('minimized');
+      startButton.remove();
+    }  
+    
+    // Add minimize buttons to each window
+    windows = document.querySelectorAll('.window');
+    windows.forEach(window => {
+      const titleBar = window.querySelector('.title-bar');
+      
+      const minimizeButton = document.createElement('button');
+      minimizeButton.textContent = '_'; // Use an underscore as the minimize symbol
+      minimizeButton.classList.add('minimize-button'); // Add a class for styling (optional)
+      minimizeButton.addEventListener('click', () => minimizeWindow(window));
+      
+      titleBar.querySelector('.title-bar-controls').appendChild(minimizeButton);
+    });    
   </script>
+  
+  
+  <div id="startbar"></div>
 </body>        
 </html>
