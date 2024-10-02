@@ -1,3 +1,10 @@
+# Minimalist sandboxed environments for generative filesystem
+## ?run='echo hello world'
+### (setup instructions coming soon)
+
+![IMG_20241001_170622259_HDR](https://github.com/user-attachments/assets/b2b0735d-5ace-4a2f-8994-b7837e809b49)
+
+
 # arena.html
 ### [a jor1k fork](https://github.com/s-macke/jor1k/)
 ![jor1k](https://jor1k.com/images/jor1k2.gif)
